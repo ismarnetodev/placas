@@ -6,6 +6,7 @@ import re
 
 # Configura o modo de aparência para escuro
 ctk.set_appearance_mode('dark')
+ctk.set_default_color_theme("tema.json") 
 
 # Inicializa a aplicação CustomTkinter
 app = ctk.CTk()
@@ -192,7 +193,7 @@ verdade = ctk.CTkLabel(app, text='')
 verdade.pack(pady=10)
 
 # Widgets da tela de cadastro de placas (visível após o login)
-label_saldo = ctk.CTkLabel(pagina_saldo, text="")
+label_saldo = ctk.CTkLabel(pagina_saldo, text="Cadastre sua placa")
 label_saldo.pack(pady=20)
 
 titulo= ctk.CTkLabel(scroll_frame_conversor, text="Cadastro e Validação de Placas", font=ctk.CTkFont(size=18, weight='bold'))
@@ -240,6 +241,9 @@ resultado_placa.pack(pady=10)
 
 botao_registrar_placa = ctk.CTkButton(scroll_frame_conversor, text="Registrar Placa", command=registro_placa)
 botao_registrar_placa.pack(pady=5)
+
+camera = ctk.CTkImage(scroll_frame_conversor, text="Veja a camera")
+camera.pack(pady=5)
 
 # Inicia o loop principal da aplicação
 app.mainloop()

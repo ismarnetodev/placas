@@ -30,6 +30,12 @@ def preprocessForOCR(image_roi):
     processada = cv2.morphologyEx(binarizada, cv2.MORPH_CLOSE, kernel)
     return processada
 
+def identificar_tipo_placa():
+    placa = text.get().upper()
+
+    padrao_mercosul = r'^[A-Z]{3}\d[A-Z]\d{2}$'
+    
+    padrao_cinza = r'^[A-Z]{3}\d{4}$'
 
 placa_detectada = False 
 

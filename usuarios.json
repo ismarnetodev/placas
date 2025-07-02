@@ -1,11 +1,16 @@
 {
     "Augusto": {
-        "senha": "unipe"
+        "senha": "unipe",
+        "placas": []
     },
     "q": {
-        "senha": "q"
+        "senha": "q",
+        "placas": [
+            "OTM2X22"
+        ]
     },
     "wl": {
-        "senha": "12"
+        "senha": "12",
+        "placas": []
     }
 }

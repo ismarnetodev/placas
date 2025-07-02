@@ -106,6 +106,28 @@ def validar_placa_input(texto):
     # Permite apenas letras maiúsculas, minúsculas e números
     return re.fullmatch(r'[A-Za-z0-9]*', texto) is not None
 
+# Função para armazenar as placas no arquivo json
+def verificar_placa(): 
+
+    if not os.path.exists(ARQUIVO_USUARIOS):
+        with open(ARQUIVO_USUARIOS, 'w') as f:
+            json.dump({}, f)
+
+    with open(ARQUIVO_USUARIOS, "r") as f:
+        return json.load(f)
+# Registra as placas no json
+def registro_placa():
+    global usuario_logado
+    placa = placa_cadastro.get().upper()
+    usuarios = carregar_usuarios()
+
+    if placa in usuarios[usuario_logado].get("placas", []):
+        return False 
+
+    usuarios[usuario_logado].setdefault("placas", []).append(placa)
+    salvar_usuarios(usuarios)
+    return True
+
 # Função para identificar o tipo de placa (Mercosul ou Cinza)
 def identificar_tipo_placa():
     placa = placa_cadastro.get().upper() # Pega o texto do campo da placa e converte para maiúsculas
@@ -215,6 +237,9 @@ botao_validar_placa.pack(pady=10)
 # Label para exibir o resultado da validação da placa
 resultado_placa = ctk.CTkLabel(scroll_frame_conversor, text='')
 resultado_placa.pack(pady=10)
+
+botao_registrar_placa = ctk.CTkButton(scroll_frame_conversor, text="Registrar Placa", command=registro_placa)
+botao_registrar_placa.pack(pady=5)
 
 # Inicia o loop principal da aplicação
 app.mainloop()

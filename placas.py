@@ -242,8 +242,8 @@ resultado_placa.pack(pady=10)
 botao_registrar_placa = ctk.CTkButton(scroll_frame_conversor, text="Registrar Placa", command=registro_placa)
 botao_registrar_placa.pack(pady=5)
 
-camera = ctk.CTkImage(scroll_frame_conversor, text="Veja a camera")
-camera.pack(pady=5)
+# camera = ctk.CTkImage(scroll_frame_conversor, text="Veja a camera")
+# camera.pack(pady=5)
 
 # Inicia o loop principal da aplicação
 app.mainloop()

@@ -12,5 +12,11 @@
     "wl": {
         "senha": "12",
         "placas": []
+    },
+    "ismar": {
+        "senha": "123",
+        "placas": [
+            "OTM2X22"
+        ]
     }
 }

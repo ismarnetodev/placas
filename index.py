@@ -8,17 +8,14 @@ imagem = cv2.imread("placa1.jpg")
 if imagem is None:
     print("Erro ao carregar a imagem.")
 else:
-    # Converter para tons de cinza
+
     cinza = cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
     
-    # Melhorar contraste com CLAHE
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     cinza = clahe.apply(cinza)
-    
-    # Binarização com Otsu
+ 
     _, binarizada = cv2.threshold(cinza, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
-    # Operações morfológicas
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
     processada = cv2.morphologyEx(binarizada, cv2.MORPH_CLOSE, kernel)
     

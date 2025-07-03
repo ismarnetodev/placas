@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import pytesseract
+import re
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
@@ -30,12 +31,17 @@ def preprocessForOCR(image_roi):
     processada = cv2.morphologyEx(binarizada, cv2.MORPH_CLOSE, kernel)
     return processada
 
-def identificar_tipo_placa():
-    placa = text.get().upper()
-
+def identificar_tipo_placa(placa):
+    placa = placa.upper()
     padrao_mercosul = r'^[A-Z]{3}\d[A-Z]\d{2}$'
-    
     padrao_cinza = r'^[A-Z]{3}\d{4}$'
+
+    if re.match(padrao_mercosul, placa):
+        return "Mercosul"
+    elif re.match(padrao_cinza, placa):
+        return "Cinza"
+    else:
+        return "Invalida"
 
 placa_detectada = False 
 
@@ -78,7 +84,9 @@ while True:
                     config = r'--oem 3 --psm 8 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                     
                     text = pytesseract.image_to_string(processed_roi, lang="eng", config=config)
-                    text = text.strip()
+                    text = text.strip().replace("\n", "").replace("\r", "").replace(" ", "")
+                    text = ''.join(c for c in text if c.isalnum())
+                    text = text.upper()
                     
                 
                     if len(text) >= 7 and len(text) <= 8 and all(c.isalnum() for c in text): 
@@ -96,6 +104,9 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == 27: 
         break
+
+tipo = identificar_tipo_placa(text)
+print(f"Placa Detectada: {text} - Tipo: {tipo}")
 
 camera.release()
 cv2.destroyAllWindows()

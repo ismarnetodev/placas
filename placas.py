@@ -3,6 +3,10 @@ import tkinter as tk
 import json
 import os
 import re
+import cv2
+import pytesseract
+import numpy as np
+import re
 
 # Configura o modo de aparência para escuro
 ctk.set_appearance_mode('dark')
@@ -25,6 +29,42 @@ ARQUIVO_USUARIOS = "usuarios.json"
 
 # Variável global para armazenar o usuário logado
 usuario_logado = None
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+def preProcessForContours(frame):
+
+    imgGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    imgBlur = cv2.GaussianBlur(imgGray, (5,5), 1)
+    imgCanny = cv2.Canny(imgBlur, 100, 200)
+    kernel = np.ones((5,5),np.uint8)
+    imgDilate = cv2.dilate(imgCanny, kernel, iterations=1)
+    imgThresh = cv2.erode(imgDilate, kernel, iterations=1)
+    return imgThresh
+
+def preprocessForOCR(image_roi):
+
+    cinza = cv2.cvtColor(image_roi, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    cinza = clahe.apply(cinza)
+    _, binarizada = cv2.threshold(cinza, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    processada = cv2.morphologyEx(binarizada, cv2.MORPH_CLOSE, kernel)
+    return processada
+
+def identificar_tipo_placa(placa):
+    placa = placa.upper()
+    padrao_mercosul = r'^[A-Z]{3}\d[A-Z]\d{2}$'
+    padrao_cinza = r'^[A-Z]{3}\d{4}$'
+
+    if re.match(padrao_mercosul, placa):
+        return "Mercosul"
+    elif re.match(padrao_cinza, placa):
+        return "Cinza"
+    else:
+        return "Invalida"
 
 # Função para carregar usuários do arquivo JSON
 def carregar_usuarios():

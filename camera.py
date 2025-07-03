@@ -2,14 +2,12 @@ import cv2
 import numpy as np
 import pytesseract
 import re
+import json
+import os
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-
-if not camera.isOpened():
-    print("Erro: Não foi possível abrir a câmera.")
-    exit()
 
 def preProcessForContours(frame):
 

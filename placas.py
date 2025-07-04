@@ -7,6 +7,7 @@ import cv2
 import pytesseract
 import numpy as np
 import re
+import threading
 
 # Configura o modo de aparência para escuro
 ctk.set_appearance_mode('dark')
@@ -34,6 +35,31 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 
 camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
+def iniciar_ocr():
+    global camera
+    placa_detectada
+    text = ""
+
+    while True:
+        ret, frame = camera.read()
+
+        if not ret:
+            print("Erro: Não foi possível ler o frame.")
+            break
+        frame = cv2.resize(frame, (640, 480))
+        imgContours = preProcessForContours(frame)
+        contours, _ = cv2.findContours(imgContours, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if 2000 < area < 20000:
+                x, y, w, h = cv2.boundingRect(cnt)
+                aspect_ratio = float(w) / h
+                if 2.0 < aspect_ratio < 4.0:
+                    margin = 5
+                    roi = frame[max(0, y - margin):min(frame.shape[0], y + h + margin),
+                                max(0, x - margin):min(frame.shape[1]), x + w + margin)]
+
 def preProcessForContours(frame):
 
     imgGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -54,7 +80,7 @@ def preprocessForOCR(image_roi):
     processada = cv2.morphologyEx(binarizada, cv2.MORPH_CLOSE, kernel)
     return processada
 
-def identificar_tipo_placa(placa):
+def identificar_tipo_placa_texto(placa):
     placa = placa.upper()
     padrao_mercosul = r'^[A-Z]{3}\d[A-Z]\d{2}$'
     padrao_cinza = r'^[A-Z]{3}\d{4}$'
@@ -282,8 +308,76 @@ resultado_placa.pack(pady=10)
 botao_registrar_placa = ctk.CTkButton(scroll_frame_conversor, text="Registrar Placa", command=registro_placa)
 botao_registrar_placa.pack(pady=5)
 
-# camera = ctk.CTkImage(scroll_frame_conversor, text="Veja a camera")
-# camera.pack(pady=5)
+placa_detectada = False 
+
+while True:
+    ret, frame = camera.read()
+
+    if not ret:
+        print("Erro: Não foi possível ler o frame.")
+        break
+    
+    if placa_detectada:
+        break 
+
+    frame = cv2.resize(frame, (640, 480))
+    
+    imgContours = preProcessForContours(frame)
+    
+    contours, hierarchy = cv2.findContours(imgContours, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area > 2000 and area < 20000: 
+            x, y, w, h = cv2.boundingRect(cnt)
+            
+           
+            aspect_ratio = float(w) / h
+            if aspect_ratio > 2.0 and aspect_ratio < 4.0: 
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                
+           
+                margin = 5
+                roi = frame[max(0, y - margin):min(frame.shape[0], y + h + margin), 
+                            max(0, x - margin):min(frame.shape[1], x + w + margin)]
+                
+                if roi.shape[0] > 0 and roi.shape[1] > 0: 
+                
+                    processed_roi = preprocessForOCR(roi)
+                    
+       
+                    config = r'--oem 3 --psm 8 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    
+                    text = pytesseract.image_to_string(processed_roi, lang="eng", config=config)
+                    text = text.strip().replace("\n", "").replace("\r", "").replace(" ", "")
+                    text = ''.join(c for c in text if c.isalnum())
+                    text = text.upper()
+                    
+                
+                    if len(text) >= 7 and len(text) <= 8 and all(c.isalnum() for c in text): 
+                        print(f"Placa Detectada: {text}")
+                        cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                        placa_detectada = True 
+                        break 
+    
+    cv2.imshow('FEED AO VIVO com OCR', frame)
+    cv2.imshow('Pré-processamento de Contorno', imgContours)
+
+    if placa_detectada:
+        cv2.waitKey(0) 
+        break 
+
+    if cv2.waitKey(1) & 0xFF == 27: 
+        break
+
+tipo = identificar_tipo_placa_texto(text)
+print(f"Placa Detectada: {text} - Tipo: {tipo}")
+
+camera.release()
+cv2.destroyAllWindows()
+
+botao_ocr = ctk.CTkButton(scroll_frame_conversor, text="Detectar Placa com OCR", command=lambda: threading.Thread(target=iniciar_ocr).start())
+botao_ocr.pack(pady=5)
 
 # Inicia o loop principal da aplicação
 app.mainloop()

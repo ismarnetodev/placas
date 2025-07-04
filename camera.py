@@ -29,7 +29,7 @@ def preprocessForOCR(image_roi):
     processada = cv2.morphologyEx(binarizada, cv2.MORPH_CLOSE, kernel)
     return processada
 
-def identificar_tipo_placa(placa):
+def identificar_tipo_placa_texto(placa):
     placa = placa.upper()
     padrao_mercosul = r'^[A-Z]{3}\d[A-Z]\d{2}$'
     padrao_cinza = r'^[A-Z]{3}\d{4}$'
@@ -103,7 +103,7 @@ while True:
     if cv2.waitKey(1) & 0xFF == 27: 
         break
 
-tipo = identificar_tipo_placa(text)
+tipo = identificar_tipo_placa_texto(text)
 print(f"Placa Detectada: {text} - Tipo: {tipo}")
 
 camera.release()

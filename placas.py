@@ -18,7 +18,7 @@ except Exception as e:
 app = ctk.CTk()
 app.title("Login e Cadastro de Placas")
 app.attributes('-fullscreen', True)
-app.geometry('410x400')
+app.geometry('410x600')
 
 pagina_saldo = ctk.CTkFrame(app)
 scroll_frame_conversor = ctk.CTkScrollableFrame(app)
@@ -192,7 +192,7 @@ def identificar_tipo_placa():
             resultado_placa.configure(text=f"Placa inválida (Cinza)", text_color="red")
     else:
         resultado_placa.configure(text="Selecione o tipo de placa", text_color="blue")
-        
+
 app.bind("<Escape>", lambda event: app.attributes("-fullscreen", False))
 vcmd_nome = app.register(apenas_leitura)
 vcmd_placa = app.register(validar_placa_input)
